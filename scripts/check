@@ -224,6 +224,72 @@ check_task_lane_overflow_policy() {
   fi
 }
 
+check_collapsed_pin_policy() {
+  local bar="$repo_dir/Bar.qml"
+  local lane="$repo_dir/qml/components/TaskLane.qml"
+  local launcher="$repo_dir/qml/components/PinnedLauncher.qml"
+  local menu="$repo_dir/qml/components/TaskContextMenu.qml"
+  local task_model="$repo_dir/qml/models/TaskModel.qml"
+  local pins="$repo_dir/qml/models/PinnedApplications.qml"
+  local state="$repo_dir/qml/PinState.js"
+
+  # A pinned running app must not also render a task button. The row filter
+  # belongs to the model, so the lane and its menu stay pin-unaware.
+  if ! rg -q 'isPinnedNormalized' "$task_model" || ! rg -q 'onPinRevisionChanged: rebuild\(\)' "$task_model"; then
+    printf 'Task model does not exclude a pinned app own task rows\n' >&2
+    return 1
+  fi
+  if rg -q 'pinnedApplications\.isPinnedNormalized' "$lane"; then
+    printf 'Task lane reaches for pin state that belongs to the task model\n' >&2
+    return 1
+  fi
+  # Exact matching alone breaks on pins stored without a .desktop suffix, so
+  # both lookups have to exist and both sides have to be normalized.
+  if ! rg -q 'function isPinnedNormalized\(desktopId\)' "$pins" || ! rg -q 'function isPinned\(desktopId\)' "$pins"; then
+    printf 'Pinned applications do not offer both exact and normalized lookups\n' >&2
+    return 1
+  fi
+  if ! rg -q 'AppIdentity\.normalized' "$pins" || ! rg -q 'AppIdentity\.normalized' "$launcher"; then
+    printf 'Pin-to-window matching does not normalize both sides\n' >&2
+    return 1
+  fi
+  # Running state must come from the shared unfiltered model, because a
+  # minimized window leaves its monitor filtered list.
+  if ! rg -q 'windowModel\.records\(\)' "$launcher" || ! rg -q 'windowModel: root\.windowModel' "$lane" || ! rg -q 'windowModel: globalWindows' "$bar"; then
+    printf 'Pin running state does not read the shared unfiltered window model\n' >&2
+    return 1
+  fi
+  # Urgent outranks focused, and a pin is only minimized when all of its
+  # windows are hidden.
+  if ! rg -q 'allMinimized' "$state" || ! rg -q 'state\.urgent === true' "$state" || ! rg -q 'Commons\.Color\.urgent' "$launcher"; then
+    printf 'Pin running indicator does not prioritize urgent over focused\n' >&2
+    return 1
+  fi
+  # The running indicator supersedes the open-menu underline rather than
+  # stacking with it.
+  if ! rg -q 'contextMenu\.open && running\.count === 0' "$launcher"; then
+    printf 'Pinned launcher stacks its running underline on the open-menu underline\n' >&2
+    return 1
+  fi
+  # A running pin acts like a task button, and Ctrl+Click keeps its
+  # floating-launch meaning.
+  if ! rg -q 'actions\.toggle\(' "$launcher" || ! rg -q 'launchFromPointer\(Qt\.ControlModifier\)' "$launcher"; then
+    printf 'Pinned launcher lost its task-button click or Ctrl+Click behavior\n' >&2
+    return 1
+  fi
+  # The window picker routes through the same window actions as a task menu.
+  if ! rg -q '"action": "window"' "$menu" || ! rg -q 'function invokeWindow\(address, action\)' "$menu" || ! rg -q 'actions\.invoke\(item\.address, item\.windowAction\)' "$menu"; then
+    printf 'Pinned launcher window picker does not route through window actions\n' >&2
+    return 1
+  fi
+  # The read-only diagnostic takes a desktop ID, so collapsing is verifiable
+  # without the mouse.
+  if ! rg -q 'function pinState\(desktopId: string\): string' "$bar"; then
+    printf 'Pin collapse diagnostics do not expose their desktop-ID argument\n' >&2
+    return 1
+  fi
+}
+
 check_workspace_spacing_policy() {
   local bar="$repo_dir/Bar.qml"
   local uses
@@ -365,6 +431,7 @@ run_check "live Omarchy branding refresh policy" check_branding_refresh_policy
 run_check "Files Places policy" check_places_policy
 run_check "independent Start and taskbar pins" check_pin_surface_independence
 run_check "fixed pins and bounded active-task overflow" check_task_lane_overflow_policy
+run_check "collapsed pinned-app tasks" check_collapsed_pin_policy
 run_check "symmetric workspace-switcher spacing" check_workspace_spacing_policy
 run_check "bounded terminal identity retry" check_terminal_identity_retry_policy
 run_check "floating application launch policy" check_floating_launch_policy

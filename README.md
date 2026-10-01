@@ -9,7 +9,8 @@ own pins. Start also has Places for your folders. It picks up your bookmarks
 from Files, alongside Home, Recent, and other built-in locations. Change a
 bookmark in Files, and Start updates automatically.
 
-See one task for each window, in opening order. Minimize and restore windows
+See one task for each window, in opening order, except that a pinned app shows
+its running state on the pin instead. Minimize and restore windows
 without changing their tiled or floating mode. Each monitor gets a bar with
 its own tasks and workspaces, plus tray icons and your configured Omarchy widgets.
 
@@ -73,6 +74,14 @@ omarchy bar reset
 - Right-click a task for window actions. Right-click a pin to launch or reorder it.
 - Tasks follow window opening order. Focus and minimize/restore do not reorder them.
 - Pinned apps stay in place when the task list scrolls. Overflow controls reveal more tasks.
+- A pinned app that is running shows an underline on its pin instead of a task
+  button. The underline marks the focused window, plain running, and minimized
+  states, and the pin counts its windows when it has more than one.
+- Clicking a running pin behaves like its task button: restore, minimize, or
+  focus. With several windows it steps through them. Ctrl+Click still opens a
+  floating window, and the menu opens another instance.
+- Right-click a running pin to pick one of its windows, or to minimize, restore,
+  or close one of them. Unpin an app to give it task buttons again.
 - Hover over the workspace button or tray chevron to reveal its contents.
 - Start and taskbar pins are independent. Start applies a changed pin order on its next opening.
 - Use search in Start to find and launch apps. Hover hints show how to pin apps

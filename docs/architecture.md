@@ -25,7 +25,7 @@ Those packaged files are read-only references for this project.
 
 Tilelane was tested on two computers, with single-monitor and multi-monitor
 setups running Omarchy 4.0.4, Hyprland 0.56.2, and Qt 6.11.2. Testing included
-manual checks and automated regression tests. The current checks passed 164
+manual checks and automated regression tests. The current checks passed 187
 QML test cases, along with integration and rendering tests.
 Window-model integration tests exercise the production model.
 
@@ -67,9 +67,17 @@ A window without that detail gets a temporary increasing order value.
 When the detail arrives, the model can correct that window's position.
 Focus, title, and minimize changes do not define task order.
 
-`TaskModel.qml` creates one row per window. It updates existing rows in place.
-This preserves button instances and the task list's scroll position.
-Pins sit outside the scrolling list. Task overflow fades cover 24 scaled pixels.
+`TaskModel.qml` creates one row per window, except windows whose resolved
+desktop entry is pinned. It updates existing rows in place. This preserves button
+instances and the task list's scroll position. Pins sit outside the scrolling
+list. Task overflow fades cover 24 scaled pixels.
+
+A pin's running state comes from the shared, unfiltered `WindowModel`, not from
+a monitor's filtered `TaskModel`. Minimizing a window moves it to
+`special:tilelane-minimized`, where it no longer matches its monitor, so a
+filtered model would drop the pin's running state at that moment. `WindowModel.records()`
+supplies plain copies for this purpose. Each screen keeps its own `TaskModel`
+and `TaskLane`; they all read the one shared window model.
 
 A new window without a PID can request one batched toplevel refresh after
 50 ms. This uses Quickshell's Hyprland API. It is not a recurring refresh loop.
@@ -125,6 +133,52 @@ Live workspace signals confirm the resulting state.
 Explicit overrides take precedence. Other matches use terminal child names,
 desktop IDs, startup classes, known web-app hosts, and a final heuristic lookup.
 Ambiguous matches retain the terminal or browser identity.
+
+## Pinned apps and running windows
+
+A pinned app that is running shows its state on the pin instead of as its own
+task button. `TaskModel.qml` excludes those rows and rebuilds when the pin
+model's revision changes. The surviving rows keep their existing button
+instances, so pinning a running app mid-list does not rebuild the others.
+Filtering lives in `TaskModel` rather than `TaskLane`, which keeps the lane and
+`openContextMenu()` unaware of pins. A window whose identity does not resolve
+matches no pin, so it stays visible rather than hiding behind the wrong pin.
+
+`PinState.js` turns the shared model's records into one pin's window list and
+its aggregate state. It is a plain JavaScript library so it can be tested
+without a compositor. A QML JavaScript library cannot import another library,
+so the caller passes the desktop-entry comparison in as a predicate.
+
+That comparison normalizes both sides through `AppIdentity.normalized()` before
+comparing them exactly. Quickshell strips the `.desktop` suffix from entry
+IDs, while stored pins keep whatever the user or Omarchy wrote, so `"zen"` and
+`"zen.desktop"` must match. `PinnedApplications.isPinnedNormalized()` applies the
+same rule. Plain `isPinned()` still uses exact strings and continues to drive
+pin editing, so stored pin values are not rewritten.
+
+The pin draws one 2px underline, matching the active-task underline in
+`TaskButton.qml`. `PinState.indicator()` picks its state: urgent outranks
+focused, then minimized when every one of the app's windows is hidden, otherwise
+running. Focused and urgent underlines span the pin; running and minimized
+underlines are shorter. Urgent uses `Commons.Color.urgent` and minimized dims
+the accent. The underline supersedes the underline that marks an open menu, so
+the two never stack. A count badge appears when the app has more than one window.
+
+Left-click on a running pin behaves like its task button: it restores a
+minimized window, minimizes the focused one, and otherwise activates it, reusing
+`WindowActions.toggle()`. With several windows it focuses the most recent one and
+cycles through the app's windows on later clicks. Ctrl+Click still requests a
+floating launch. Launching another instance moves to the menu's Open item.
+
+The pin's right-click menu lists the app's windows above the existing pin items
+when it has more than one. Selecting a row focuses that window, restoring it if
+it is minimized. Each row carries minimize or restore and close as secondary
+pointer actions beside the title.
+
+Terminal windows group as expected. `AppIdentity.terminalEntry()` maps a
+terminal-hosted window to the terminal's own desktop entry, so pinning a
+terminal collapses all of its windows under that one pin. This is the same
+grouping the Start menu and task list already use.
 
 The identity helper checks whether a new window's process owns a terminal.
 It walks at most 128 descendant processes and reports executable names.
@@ -343,3 +397,9 @@ control state, configured widget IDs/order, and targeted action results. It omit
 account data, and registry source paths. Address lookup needs a supplied PID
 or app ID. Window state and actions need a supplied address.
 These commands run in the user's session. They are not an authorization layer.
+
+`pinState` is the one exception to omitting titles. It reports each pin's
+window count, aggregate state, and window titles, which is how the collapsed-pinned
+behavior can be checked without using the mouse. Pass a desktop ID for one pin
+or an empty string for all of them. `pinCollapses` reports whether an identity
+currently collapses its task buttons.

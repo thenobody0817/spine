@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+- A pinned app that is running now shows its state on the pin instead of a
+  separate task button, so it appears once rather than twice.
+- Pinned taskbar apps match their windows ignoring case and an optional
+  `.desktop` suffix, so a stored pin finds the windows it should collapse.
+- A pin's underline marks a focused window, plain running, and minimized states,
+  and urgent windows take priority over focus. A pin with several windows shows
+  a count.
+- Clicking a running pin restores, minimizes, or focuses like its task button,
+  and steps through the app's windows when it has more than one.
+- A running pin's right-click menu lists the app's windows. Selecting one
+  focuses it, and each row offers minimize or restore and close.
+- New read-only `pinState` and `pinCollapses` diagnostics report which windows
+  each pin has collapsed.
+- Collapsing is always on for pins and adds no stored setting. Unpin an app to
+  give it its own task buttons again.
+
 ## 0.1.1
 
 - Display bookmark names and other Tilelane labels as plain text, preventing

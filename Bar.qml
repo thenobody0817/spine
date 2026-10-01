@@ -6,8 +6,10 @@ import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Services.SystemTray
 import Quickshell.Wayland
+import "qml/AppIdentity.js" as AppIdentity
 import "qml/BarGeometry.js" as BarGeometry
 import "qml/PanelRouting.js" as PanelRouting
+import "qml/PinState.js" as PinState
 import "qml/components"
 import "qml/models"
 import qs.Commons as Commons
@@ -544,6 +546,48 @@ Item {
             return String(taskbarPinnedApplications.pins.length);
         }
 
+        function pinCollapses(desktopId: string): string {
+            const pinKey = AppIdentity.normalized(desktopId);
+            return pinKey !== "" && taskbarPinnedApplications.isPinnedNormalized(pinKey) ? "collapsed" : "visible";
+        }
+
+        // Read-only view of each pin's running windows. An empty desktop ID
+        // reports every pin. Window titles appear here only, so this is the
+        // supported way to confirm which windows a pin has collapsed.
+        function pinState(desktopId: string): string {
+            const expected = String(desktopId || "");
+            const pins = expected === "" ? taskbarPinnedApplications.pins : [expected];
+            const records = AppIdentity.taskRecords(globalWindows.records(), record => applicationCatalog.identityFor(record));
+            const result = [];
+            for (let index = 0; index < pins.length; index++) {
+                const pinKey = String(AppIdentity.normalized(pins[index] || ""));
+                const state = PinState.forPin(records, pins[index], function (candidate) {
+                    return pinKey !== "" && pinKey === AppIdentity.normalized(candidate);
+                });
+                const windows = [];
+                for (let windowIndex = 0; windowIndex < state.windows.length; windowIndex++) {
+                    const window = state.windows[windowIndex];
+                    windows.push({
+                        "address": window.address,
+                        "title": window.title,
+                        "active": window.active,
+                        "urgent": window.urgent,
+                        "minimized": window.minimized
+                    });
+                }
+                result.push({
+                    "desktopId": String(pins[index] || ""),
+                    "count": state.count,
+                    "active": state.active,
+                    "urgent": state.urgent,
+                    "anyMinimized": state.anyMinimized,
+                    "indicator": PinState.indicator(state),
+                    "windows": windows
+                });
+            }
+            return JSON.stringify(result);
+        }
+
         function pinAction(desktopId: string, action: string): string {
             if (action === "pin")
                 return taskbarPinnedApplications.pin(desktopId) ? "queued" : "unchanged";
@@ -787,6 +831,7 @@ Item {
             sourceRevision: screenWindows.revision
             applicationCatalog: applicationCatalog
             applicationRevision: applicationCatalog.revision
+            pinnedApplications: taskbarPinnedApplications
         }
 
         Rectangle {
@@ -862,6 +907,7 @@ Item {
             actions: globalActions
             applicationCatalog: applicationCatalog
             pinnedApplications: taskbarPinnedApplications
+            windowModel: globalWindows
             bar: root
             barHeight: root.barHeight
             uiScale: root.barScale

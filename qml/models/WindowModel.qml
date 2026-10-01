@@ -38,6 +38,13 @@ Item {
         return index === -1 ? null : WindowState.copyRecord(windows.get(index));
     }
 
+    function records() {
+        const result = [];
+        for (let index = 0; index < windows.count; index++)
+            result.push(WindowState.copyRecord(windows.get(index)));
+        return result;
+    }
+
     function addressForPid(pid) {
         const expected = Number(pid || 0);
         if (expected <= 0)

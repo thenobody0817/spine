@@ -73,6 +73,21 @@ function application(label, shortcut) {
     return withShortcut(String(label || "Application"), shortcut);
 }
 
+function pinnedApplication(label, shortcut, state, count) {
+    var text = String(label || "Application");
+    var total = Math.max(0, Math.round(Number(count || 0)));
+    var detail = "";
+    if (String(state || "none") === "urgent")
+        detail = "needs attention";
+    else if (String(state || "none") === "focused")
+        detail = "focused";
+    else if (String(state || "none") === "minimized")
+        detail = total > 1 ? total + " minimized windows" : "minimized";
+    else if (total > 1)
+        detail = total + " windows";
+    return withShortcut(detail === "" ? text : text + ", " + detail, shortcut);
+}
+
 function startIndicator(id, active) {
     var key = String(id || "");
     if (key === "Dictation")
@@ -100,7 +115,12 @@ function tray(label) {
 
 function workspaceMoveShortcuts(shortcuts) {
     var groups = [];
-    var arrows = { "Left": "←", "Right": "→", "Up": "↑", "Down": "↓" };
+    var arrows = {
+        "Left": "←",
+        "Right": "→",
+        "Up": "↑",
+        "Down": "↓"
+    };
     (shortcuts || []).forEach(function (shortcut) {
         if (!shortcut)
             return;
@@ -108,15 +128,22 @@ function workspaceMoveShortcuts(shortcuts) {
         var prefix = split < 0 ? "" : shortcut.slice(0, split + 3);
         var key = shortcut.slice(split < 0 ? 0 : split + 3);
         key = arrows[key] || key;
-        var group = groups.filter(function (item) { return item.prefix === prefix; })[0];
+        var group = groups.filter(function (item) {
+            return item.prefix === prefix;
+        })[0];
         if (!group) {
-            group = { "prefix": prefix, "keys": [] };
+            group = {
+                "prefix": prefix,
+                "keys": []
+            };
             groups.push(group);
         }
         if (group.keys.indexOf(key) === -1)
             group.keys.push(key);
     });
-    return groups.map(function (group) { return group.prefix + group.keys.join("/"); }).join(", ");
+    return groups.map(function (group) {
+        return group.prefix + group.keys.join("/");
+    }).join(", ");
 }
 
 function workspace(shortcut, monitorCount, moveShortcuts) {

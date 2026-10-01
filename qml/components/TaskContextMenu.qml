@@ -1,7 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell
+import "../PinState.js" as PinState
+import "../TaskLogic.js" as TaskLogic
 import qs.Commons as Commons
 import qs.Ui as Ui
 
@@ -19,9 +20,11 @@ Ui.KeyboardPanel {
     property var actions: null
     property var applicationCatalog: null
     property var pinnedApplications: null
+    property var pinState: null
     property int currentIndex: 0
     readonly property int pinRevision: pinnedApplications ? pinnedApplications.revision : 0
-    readonly property var menuItems: buildItems(pinRevision)
+    readonly property var pinWindows: pinState && Array.isArray(pinState.windows) ? pinState.windows : []
+    readonly property var menuItems: buildItems(pinRevision, pinWindows)
 
     contentWidth: Commons.Style.space(292)
     contentHeight: menuColumn.implicitHeight + Commons.Style.space(16)
@@ -29,9 +32,38 @@ Ui.KeyboardPanel {
     gap: Commons.Style.space(7)
     focusTarget: menuFocus
 
-    function buildItems(revision) {
+    // A pinned app hides its task buttons, so its own menu lists those windows
+    // and focuses one on select. Minimize/restore and close sit beside each row
+    // as secondary pointer actions.
+    function windowItems() {
+        const items = [];
+        if (pinWindows.length <= 1)
+            return items;
+        for (let index = 0; index < pinWindows.length; index++) {
+            const window = pinWindows[index];
+            items.push({
+                "action": "window",
+                "address": window.address,
+                "windowAction": window.minimized === true ? "restore" : "activate",
+                "windowMinimized": window.minimized === true,
+                "windowCount": pinWindows.length,
+                "glyph": "󰄜",
+                "label": TaskLogic.displayTitle(window.title, label),
+                "shortcut": PinState.windowStateLabel(window),
+                "available": window.address !== ""
+            });
+        }
+        items.push({
+            "divider": true
+        });
+        return items;
+    }
+
+    function buildItems(revision, windows) {
         const items = [];
         if (launcherOnly) {
+            for (const item of windowItems())
+                items.push(item);
             items.push({
                 "action": "launch",
                 "glyph": "󰏌",
@@ -166,6 +198,13 @@ Ui.KeyboardPanel {
         return start;
     }
 
+    function invokeWindow(address, action) {
+        if (!actions || String(address || "") === "")
+            return;
+        actions.invoke(address, action);
+        close();
+    }
+
     function invoke(item) {
         if (!item || item.divider || !item.available)
             return;
@@ -181,6 +220,8 @@ Ui.KeyboardPanel {
             pinnedApplications.move(desktopId, -1);
         else if (item.action === "right" && pinnedApplications)
             pinnedApplications.move(desktopId, 1);
+        else if (item.action === "window" && actions)
+            actions.invoke(item.address, item.windowAction);
         else if (actions && ["activate", "close", "minimize", "restore", "maximize", "float"].indexOf(item.action) !== -1)
             actions.invoke(item.address, item.action);
         close();
@@ -279,7 +320,7 @@ Ui.KeyboardPanel {
                     Text {
                         visible: !menuRow.modelData.divider
                         anchors.left: actionGlyph.right
-                        anchors.right: shortcutLabel.left
+                        anchors.right: windowActions.left
                         anchors.leftMargin: Commons.Style.space(8)
                         anchors.rightMargin: Commons.Style.space(24)
                         anchors.verticalCenter: parent.verticalCenter
@@ -302,6 +343,84 @@ Ui.KeyboardPanel {
                         color: Commons.Util.alpha(Commons.Color.menu.text, 0.62)
                         font.family: Commons.Style.font.menuFamily
                         font.pixelSize: Commons.Style.font.caption
+                    }
+
+                    Item {
+                        id: windowActions
+
+                        readonly property bool present: !menuRow.modelData.divider && menuRow.modelData.action === "window"
+
+                        // The row's own click area fills the row, so these
+                        // secondary actions sit above it.
+                        z: 1
+                        anchors.right: shortcutLabel.left
+                        anchors.rightMargin: Commons.Style.space(6)
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: present ? Commons.Style.space(48) : 0
+                        height: Commons.Style.space(22)
+
+                        Rectangle {
+                            id: windowMinimizeAction
+
+                            visible: windowActions.present
+                            width: parent.width / 2
+                            height: parent.height
+                            radius: Commons.Style.space(4)
+                            color: minimizePointer.containsMouse ? Commons.Color.menu.selectedBackground : "transparent"
+
+                            Accessible.role: Accessible.Button
+                            Accessible.name: menuRow.modelData.windowMinimized === true ? "Restore window" : "Minimize window"
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: menuRow.modelData.windowMinimized === true ? "󰁯" : "󰖰"
+                                textFormat: Text.PlainText
+                                color: Commons.Color.menu.text
+                                font.family: Commons.Style.font.family
+                                font.pixelSize: Commons.Style.font.body
+                            }
+
+                            MouseArea {
+                                id: minimizePointer
+
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onEntered: root.currentIndex = menuRow.index
+                                onClicked: root.invokeWindow(menuRow.modelData.address, menuRow.modelData.windowMinimized === true ? "restore" : "minimize")
+                            }
+                        }
+
+                        Rectangle {
+                            visible: windowActions.present
+                            anchors.left: windowMinimizeAction.right
+                            width: parent.width / 2
+                            height: parent.height
+                            radius: Commons.Style.space(4)
+                            color: closePointer.containsMouse ? Commons.Color.menu.selectedBackground : "transparent"
+
+                            Accessible.role: Accessible.Button
+                            Accessible.name: "Close window"
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "󰅖"
+                                textFormat: Text.PlainText
+                                color: Commons.Color.menu.text
+                                font.family: Commons.Style.font.family
+                                font.pixelSize: Commons.Style.font.body
+                            }
+
+                            MouseArea {
+                                id: closePointer
+
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onEntered: root.currentIndex = menuRow.index
+                                onClicked: root.invokeWindow(menuRow.modelData.address, "close")
+                            }
+                        }
                     }
 
                     MouseArea {

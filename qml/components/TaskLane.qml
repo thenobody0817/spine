@@ -11,6 +11,7 @@ Item {
     required property var actions
     required property var applicationCatalog
     required property var pinnedApplications
+    required property var windowModel
     required property var bar
     required property real sectionGap
     property string screenName: ""
@@ -62,6 +63,8 @@ Item {
                     uiScale: root.uiScale
                     applicationCatalog: root.applicationCatalog
                     pinnedApplications: root.pinnedApplications
+                    windowModel: root.windowModel
+                    actions: root.actions
                     bar: root.bar
                 }
             }

@@ -40,6 +40,16 @@ TestCase {
         compare(HintLogic.task("Editor"), "Editor");
     }
 
+    function test_pinnedHintReportsRunningStateAndWindowCount() {
+        compare(HintLogic.pinnedApplication("Cliamp", "", "none", 0), "Cliamp");
+        compare(HintLogic.pinnedApplication("Cliamp", "Super + Enter", "running", 1), "Cliamp (Super + Enter)");
+        compare(HintLogic.pinnedApplication("Cliamp", "", "running", 3), "Cliamp, 3 windows");
+        compare(HintLogic.pinnedApplication("Cliamp", "", "focused", 1), "Cliamp, focused");
+        compare(HintLogic.pinnedApplication("Cliamp", "", "urgent", 4), "Cliamp, needs attention");
+        compare(HintLogic.pinnedApplication("Cliamp", "", "minimized", 1), "Cliamp, minimized");
+        compare(HintLogic.pinnedApplication("Cliamp", "", "minimized", 2), "Cliamp, 2 minimized windows");
+    }
+
     function test_trayHintDoesNotExplainStandardPointerBehavior() {
         compare(HintLogic.tray("Dropbox"), "Dropbox");
         compare(HintLogic.tray("Updates"), "Updates");

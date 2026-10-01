@@ -23,6 +23,19 @@ QtObject {
         return pins.indexOf(String(desktopId || "")) !== -1;
     }
 
+    // Stored pins and resolved window identities differ only by case and an
+    // optional .desktop suffix, because Quickshell strips that suffix from
+    // entry.id. Compare both sides the same way, or pinning silently stops
+    // matching the windows it is supposed to collapse.
+    function isPinnedNormalized(desktopId) {
+        const key = AppIdentity.normalized(desktopId);
+        if (key === "")
+            return false;
+        return pins.some(function (pin) {
+            return AppIdentity.normalized(pin) === key;
+        });
+    }
+
     function pin(desktopId) {
         const id = String(desktopId || "");
         if (!AppIdentity.validDesktopId(id) || isPinned(id))

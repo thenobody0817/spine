@@ -90,7 +90,24 @@ Back up this file before editing it. Keep its other fields and layout entries.
 | `reducedMotion`             | `true` or `false`                                     |
 
 To clear pins, set the corresponding array to `[]`. A missing app remains a
-removable taskbar pin. Invalid fields use safe defaults and log an error.
+removable taskbar pin.
+
+A pinned app that is running shows an underline on its pin instead of its own
+task buttons. This is not a stored setting, so there is nothing to reset for it.
+To give an app its task buttons back, unpin it with its right-click menu or:
+
+```sh
+omarchy-shell tilelane pinAction zen unpin
+```
+
+Pin values are matched loosely, ignoring case and an optional `.desktop`
+suffix, because Quickshell strips that suffix from desktop-entry IDs. Storing
+`"zen"` or `"zen.desktop"` works the same way. Tilelane does not rewrite a
+stored pin to match a running app. If a running app does not collapse, its
+identity may not resolve; check `omarchy-shell tilelane identityOverrides`
+settings and the app's window identity in Hyprland.
+
+Invalid fields use safe defaults and log an error.
 Tilelane leaves the invalid data on disk until you correct it or change that
 setting. Other valid settings remain usable. An unsupported settings version
 blocks saves.
@@ -155,6 +172,7 @@ omarchy-shell tilelane revision
 omarchy-shell tilelane workspaceState
 omarchy-shell tilelane applicationIndexCount
 omarchy-shell tilelane pinCount
+omarchy-shell tilelane pinState ''
 omarchy-shell tilelane startPinCount
 omarchy-shell tilelane statusState ''
 omarchy-shell tilelane startState ''
@@ -165,7 +183,20 @@ Use an exact monitor name from `hyprctl monitors -j` when checking a specific sc
 
 `windowState` takes a window address. `windowAddressForPid` and
 `windowAddressForAppId` return an address for a supplied identifier.
-Diagnostics omit titles, command lines, account data, and registry paths.
+
+`pinState` reports each pin's window count, whether any of its windows is
+focused, urgent, or minimized, its indicator state, and its window titles. Pass a
+desktop ID for one pin and an empty string for all of them. It is how to confirm
+which windows a pin has collapsed without using the mouse:
+
+```sh
+omarchy-shell tilelane pinState ''
+omarchy-shell tilelane pinState zen
+```
+
+`pinCollapses` answers whether an identity currently collapses its task
+buttons. Diagnostics omit titles except for `pinState`, and never include
+command lines, account data, or registry paths.
 
 ## Remove Tilelane
 

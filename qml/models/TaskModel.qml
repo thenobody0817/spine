@@ -10,6 +10,8 @@ Item {
     required property int sourceRevision
     required property var applicationCatalog
     required property int applicationRevision
+    property var pinnedApplications: null
+    readonly property int pinRevision: pinnedApplications ? pinnedApplications.revision : 0
     property alias model: tasks
 
     function recordAt(index) {
@@ -32,11 +34,18 @@ Item {
         };
     }
 
+    function isPinnedTask(task) {
+        return pinnedApplications && pinnedApplications.isPinnedNormalized(task.desktopId);
+    }
+
     function rebuild() {
         const records = [];
         for (let index = 0; index < sourceModel.count; index++)
             records.push(recordAt(index));
-        const taskRecords = AppIdentity.taskRecords(records, record => applicationCatalog.identityFor(record));
+        const resolved = AppIdentity.taskRecords(records, record => applicationCatalog.identityFor(record));
+        // A pinned app shows its running state on the pin, so its own task
+        // buttons are dropped. An unresolved identity matches no pin and stays.
+        const taskRecords = pinnedApplications ? resolved.filter(task => !isPinnedTask(task)) : resolved;
 
         // Keep delegates (and the lane's scroll position) across state and
         // metadata changes. Opening order belongs to the window, not its state.
@@ -64,6 +73,7 @@ Item {
 
     onSourceRevisionChanged: rebuild()
     onApplicationRevisionChanged: rebuild()
+    onPinRevisionChanged: rebuild()
     Component.onCompleted: rebuild()
 
     ListModel {
