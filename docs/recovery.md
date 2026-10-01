@@ -2,17 +2,17 @@
 
 ## Select or reset the bar
 
-Check that the shell responds and Tilelane is installed:
+Check that the shell responds and Spine is installed:
 
 ```sh
 omarchy-shell shell ping
 omarchy plugin list --json
 ```
 
-Select Tilelane:
+Select Spine:
 
 ```sh
-omarchy bar use io.github.lexeko.tilelane
+omarchy bar use io.github.thenobody0817.spine
 ```
 
 Return to the built-in bar:
@@ -40,12 +40,12 @@ A development install must contain the QML files and runtime scripts.
 Validate the installed folder, then ask Omarchy to discover changes:
 
 ```sh
-omarchy plugin validate ~/.config/omarchy/plugins/io.github.lexeko.tilelane
+omarchy plugin validate ~/.config/omarchy/plugins/io.github.thenobody0817.spine
 omarchy-shell shell rescanPlugins
 ```
 
 If the old component is still visible, use `omarchy restart shell`.
-Do not edit `/usr/share/omarchy` or start Tilelane in another Quickshell process.
+Do not edit `/usr/share/omarchy` or start Spine in another Quickshell process.
 
 ## Check the running bar
 
@@ -55,29 +55,29 @@ From the repository root:
 ./scripts/smoke
 ```
 
-This is a read-only check. It requires Tilelane to be selected already.
+This is a read-only check. It requires Spine to be selected already.
 It checks the shell, active plugin ID, layer count, and bottom reservation.
 Its default expected height is 44 logical pixels. Set
 `TILELANE_EXPECTED_HEIGHT` if Omarchy's font or spacing settings change that height.
 
 ## Recover minimized windows
 
-Tilelane moves minimized windows to `special:tilelane-minimized`.
+Spine moves minimized windows to `special:tilelane-minimized`.
 It writes the original workspace to a journal in Quickshell's state directory.
 The filename is `tilelane-minimized-v1.json`.
 
-A normal bar reset queues restores for tracked windows before Tilelane unloads.
-After a hard shell failure, select Tilelane again and click the minimized task.
+A normal bar reset queues restores for tracked windows before Spine unloads.
+After a hard shell failure, select Spine again and click the minimized task.
 The new instance reads the journal and restores the window to its saved workspace.
 
 A missing or invalid journal cannot supply the original workspace.
-Tilelane will not guess a tiled restore through the native minimized setter
+Spine will not guess a tiled restore through the native minimized setter
 for a window in its private workspace. Keep a valid journal when recovering
-from a crash. Do not edit it while Tilelane is active.
+from a crash. Do not edit it while Spine is active.
 
 ## Recover pins or settings
 
-Tilelane stores its settings on the `bar` entry in
+Spine stores its settings on the `bar` entry in
 `~/.config/omarchy/shell.json`. `XDG_CONFIG_HOME`, when set, replaces `~/.config`.
 Back up this file before editing it. Keep its other fields and layout entries.
 
@@ -102,17 +102,17 @@ omarchy-shell tilelane pinAction zen unpin
 
 Pin values are matched loosely, ignoring case and an optional `.desktop`
 suffix, because Quickshell strips that suffix from desktop-entry IDs. Storing
-`"zen"` or `"zen.desktop"` works the same way. Tilelane does not rewrite a
+`"zen"` or `"zen.desktop"` works the same way. Spine does not rewrite a
 stored pin to match a running app. If a running app does not collapse, its
-identity may not resolve; check `omarchy-shell tilelane identityOverrides`
-settings and the app's window identity in Hyprland.
+identity may not resolve; check the app's window class in
+`hyprctl clients -j` against the `tilelaneIdentityOverrides` setting.
 
 Invalid fields use safe defaults and log an error.
-Tilelane leaves the invalid data on disk until you correct it or change that
+Spine leaves the invalid data on disk until you correct it or change that
 setting. Other valid settings remain usable. An unsupported settings version
 blocks saves.
 
-On first use, Tilelane imports preferences from the old
+On first use, Spine imports preferences from the old
 `~/.config/tilelane/pins.json`. Existing inline settings take precedence.
 Old taskbar and Start pins are not imported. The old files remain untouched.
 After `tilelaneSettingsVersion` is set, they are no longer read.
@@ -129,12 +129,12 @@ omarchy-shell tilelane reducedMotionSet false
 
 ## Check places in Start
 
-Start gets its bookmarks from Files. They are separate from Tilelane's app pins.
+Start gets its bookmarks from Files. They are separate from Spine's app pins.
 Changes in Files should appear automatically.
 
 If a bookmark is missing or stale, check
 `$XDG_CONFIG_HOME/gtk-3.0/bookmarks`. The default path is
-`~/.config/gtk-3.0/bookmarks`. Tilelane reads `~/.gtk-bookmarks` only when that
+`~/.config/gtk-3.0/bookmarks`. Spine reads `~/.gtk-bookmarks` only when that
 file is unavailable. An empty GTK 3 bookmark file means no bookmarks.
 
 Home, Recent, Starred, Network, and Trash are built-in entries. Removing
@@ -162,7 +162,7 @@ omarchy-shell shell hide omarchy.audio
 
 These two commands change panel visibility. An unavailable or disabled widget
 cannot open. After enabling or reinstalling one, rescan plugins or restart the shell.
-Do not copy Omarchy's panel implementation into Tilelane.
+Do not copy Omarchy's panel implementation into Spine.
 
 ## Read-only diagnostics
 
@@ -198,14 +198,14 @@ omarchy-shell tilelane pinState zen
 buttons. Diagnostics omit titles except for `pinState`, and never include
 command lines, account data, or registry paths.
 
-## Remove Tilelane
+## Remove Spine
 
 ```sh
 omarchy bar reset
-omarchy plugin remove io.github.lexeko.tilelane
+omarchy plugin remove io.github.thenobody0817.spine
 ```
 
-Removal deletes the installed plugin. Tilelane's fields remain on `bar` in
+Removal deletes the installed plugin. Spine's fields remain on `bar` in
 `shell.json`, ready for a later install. To clear them, back up `shell.json` and
 remove `tilelaneSettingsVersion`, `tilelanePins`, `tilelaneStartPins`, and
 `tilelaneIdentityOverrides`. Keep shared fields such as `layout` and `reducedMotion`.

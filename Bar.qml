@@ -444,7 +444,7 @@ Item {
 
         shell: root.shell
         barConfig: root.barConfig
-        pluginId: root.manifest ? root.manifest.id : "io.github.lexeko.tilelane"
+        pluginId: root.manifest ? root.manifest.id : "io.github.thenobody0817.spine"
     }
 
     PinnedApplications {

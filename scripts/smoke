@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-plugin_id="io.github.lexeko.tilelane"
+plugin_id="io.github.thenobody0817.spine"
 expected_height="${TILELANE_EXPECTED_HEIGHT:-44}"
 
 if ! command -v jq >/dev/null 2>&1; then

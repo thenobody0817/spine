@@ -7,23 +7,34 @@ This document describes the current code. Historical measurements are in
 
 The root manifest declares schema version 1, kind `bar`, and entry point
 `Bar.qml`. The root is a QML `Item`. Omarchy loads it into the existing shell.
-Tilelane creates one bottom `PanelWindow` for each Quickshell screen.
+Spine creates one bottom `PanelWindow` for each Quickshell screen.
 
 The root accepts `omarchyPath`, `shell`, `manifest`, `pluginRegistry`,
 `barWidgetRegistry`, and `barConfig`. Omarchy supplies restricted interfaces
-and detached configuration snapshots to third-party plugins. Tilelane uses
+and detached configuration snapshots to third-party plugins. Spine uses
 those interfaces for configured widgets and non-authentication menus.
 
 The host selects the full bar through `bar.id` in `shell.json`.
-`omarchy bar use io.github.lexeko.tilelane` selects Tilelane. `omarchy bar reset` selects
+`omarchy bar use io.github.thenobody0817.spine` selects Spine. `omarchy bar reset` selects
 the built-in bar. Omarchy handles missing or invalid bar entries and load failures.
+
+Spine is a fork of `lexeko/tilelane` and installs under its own plugin id, so
+upstream Tilelane and this fork can both be installed at once. The plugin id is
+the directory name under `~/.config/omarchy/plugins/` and must match `bar.id`.
+`TilelaneSettings.qml` gates every read and write on that match, so changing one
+side without the other leaves the bar inert with no visible error. Runtime
+strings keep their upstream `tilelane` spelling on purpose: the IPC target, the
+layer-shell namespaces, the `tilelane*` fields in `shell.json`, the
+`special:tilelane-minimized` workspace, and its minimize journal. Those names
+address existing user data, and minimized windows would be stranded if the fork
+renamed them without migrating the journal.
 This fallback does not guarantee recovery from every runtime error.
 
 The contract comes from the installed `shell/README.md`, `shell.qml`, and
 `services/PluginRegistry.qml` under `/usr/share/omarchy`.
 Those packaged files are read-only references for this project.
 
-Tilelane was tested on two computers, with single-monitor and multi-monitor
+Spine was tested on two computers, with single-monitor and multi-monitor
 setups running Omarchy 4.0.4, Hyprland 0.56.2, and Qt 6.11.2. Testing included
 manual checks and automated regression tests. The current checks passed 187
 QML test cases, along with integration and rendering tests.
@@ -90,7 +101,7 @@ Close first tries the Wayland handle. Other actions and fallback paths use
 one detached `hyprctl eval` command.
 
 The tested Hyprland release ignored the Wayland toplevel's minimized setter.
-Tilelane therefore moves minimized windows to `special:tilelane-minimized`.
+Spine therefore moves minimized windows to `special:tilelane-minimized`.
 The recovery journal records its original workspace before the move.
 The model must observe the hidden workspace before a later normal-workspace
 update can clear that record. This avoids losing the origin during an
@@ -124,7 +135,7 @@ hint disappears when only one screen remains.
 
 Workspace actions use `Hyprland.dispatch()` with validated Lua commands.
 The tested Quickshell workspace helper emitted an older command grammar that
-Hyprland rejected. Tilelane accepts numbered targets from 1 through 10.
+Hyprland rejected. Spine accepts numbered targets from 1 through 10.
 Live workspace signals confirm the resulting state.
 
 ## App identity and launch
@@ -223,7 +234,7 @@ section's information widgets, and the clock in separate groups. It preserves
 configured item order within each group and keeps the clock at the right edge.
 Spacing follows these display groups rather than the source sections.
 It includes only entries present in the injected `barWidgetRegistry`. The
-standard menu, workspace, and indicator entries are excluded because Tilelane
+standard menu, workspace, and indicator entries are excluded because Spine
 supplies those surfaces itself. A registry entry alone does not add an icon;
 the widget must also be configured in the layout. Settings merge registry
 defaults with that entry's inline values.
@@ -242,14 +253,14 @@ Multiple instances are allowed only when the registry metadata permits them.
 of active state. It reads `items` (or the legacy `indicators` list) from the
 indicator widget's settings. An empty selection uses the ordered choices in
 the registered widget's `items` schema, matching Omarchy's all-indicators
-default without duplicating the list in Tilelane. Stable keys retain native
+default without duplicating the list in Spine. Stable keys retain native
 instances across configuration reordering and settings edits.
 
 The row loads Omarchy's native indicator QML files from the sibling
 `indicators` directory used by Omarchy's widget, supplying the
 native `single` block, settings, bar, and refresh host. Indicator IDs cannot
 contain path separators or traversal. Native state, visuals, and actions stay
-with those components; Tilelane supplies placement and Start's hints. The
+with those components; Spine supplies placement and Start's hints. The
 `omarchy.indicators refresh` IPC broadcasts to every screen's row. This adapter
 depends on Omarchy's current indicator schema, source layout, and `BarIndicator`
 properties; changes to that contract require compatibility review.
@@ -267,7 +278,7 @@ own mouse and wheel handlers; the generic host does not replace their internal
 controls or promise to override styling drawn by the plugin itself.
 Native visuals retain their intrinsic size when they fit the full bar height;
 only taller widgets scale down proportionally. Their height includes native
-button padding, so fitting them into Tilelane's smaller hover rectangle would
+button padding, so fitting them into Spine's smaller hover rectangle would
 also shrink the icon. Sizing has no per-plugin overrides.
 
 `HostedBarWidget.qml` loads widget implementations from the injected registry
@@ -309,7 +320,7 @@ Numbered shortcuts count visible panels in horizontal order.
 
 Shortcut labels come from `omarchy menu keybindings --print`. The catalog reads
 them at startup and refreshes when the watched user bindings change. Labels
-match existing command descriptions. Tilelane does not write keybindings.
+match existing command descriptions. Spine does not write keybindings.
 
 `BarMouseArea.qml` extends each control's clickable area to the bottom edge.
 It clips horizontal click bounds to the visible task or tray viewport.
@@ -321,7 +332,7 @@ layout, so changing widget order or size keeps edge interaction intact.
 
 ## External text
 
-All Text items owned by Tilelane explicitly use `Text.PlainText`. Bookmark
+All Text items owned by Spine explicitly use `Text.PlainText`. Bookmark
 labels, app names, window titles, shortcut hints, clock formats, and status
 labels remain literal strings; embedded markup cannot change their formatting
 or load inline images. Hosted widgets retain responsibility for their own text.
@@ -333,21 +344,21 @@ checks every owned Text declaration for this policy.
 | Path                                                 | Use                                                |
 | ---------------------------------------------------- | -------------------------------------------------- |
 | `Quickshell.statePath("tilelane-minimized-v1.json")` | Minimize recovery journal                          |
-| Omarchy `shell.json`                                 | Active bar, widgets, Tilelane pins and preferences |
+| Omarchy `shell.json`                                 | Active bar, widgets, Spine pins and preferences |
 | `$XDG_CONFIG_HOME/tilelane/pins.json`                | Read once for legacy preferences, never written    |
 
 `XDG_CONFIG_HOME` defaults to `~/.config`.
-Tilelane uses inline fields on the `bar` entry: `tilelanePins`,
+Spine uses inline fields on the `bar` entry: `tilelanePins`,
 `tilelaneStartPins`, `tilelaneIdentityOverrides`, and `reducedMotion`.
 `tilelaneSettingsVersion: 1` records initialization. The injected `barConfig`
 snapshot supplies current values. Saves use the scoped
 `shell.mutateShellConfig()` callback, which lets the host persist bar changes.
-Tilelane does not write `shell.json` directly or start a process to save pins.
+Spine does not write `shell.json` directly or start a process to save pins.
 Each action changes only its own field and preserves other bar and shell settings.
 
-On first use, Tilelane reads identity overrides and reduced motion from the
+On first use, Spine reads identity overrides and reduced motion from the
 old pin file. Existing inline values take precedence. Old pins are not imported.
-Once initialized, Tilelane no longer reads the old file. Invalid legacy
+Once initialized, Spine no longer reads the old file. Invalid legacy
 preferences block initialization and report an error rather than being discarded.
 Invalid inline fields use safe defaults without rewriting the stored data.
 Valid fields remain usable. An unsupported settings version blocks writes.
@@ -355,7 +366,7 @@ Valid fields remain usable. An unsupported settings version blocks writes.
 Start always includes Home, Recent, Starred, Network, and Trash. It adds
 bookmarks from `$XDG_CONFIG_HOME/gtk-3.0/bookmarks`, the file used by Files.
 Bookmark labels and order follow that file. Duplicate URIs appear once.
-Tilelane only reads bookmarks; users manage them in Files.
+Spine only reads bookmarks; users manage them in Files.
 It falls back to `~/.gtk-bookmarks` when the GTK 3 bookmark file is unavailable.
 File watchers reload bookmark and directory files before updating the Places
 model. An empty GTK bookmark file means no bookmarks; it does not trigger the
@@ -384,7 +395,7 @@ The shortcut catalog watches `~/.config/hypr/bindings.lua`.
 
 The three runtime helper scripts require Bash and standard system utilities.
 There is no installer hook, downloaded runtime code, compiled helper, privilege
-request, or Tilelane-owned service. Hosted Omarchy widgets keep their upstream
+request, or Spine-owned service. Hosted Omarchy widgets keep their upstream
 refresh schedules and command behavior. A process-free claim would be false.
 
 A resident helper would need a specific capability, measurements, and a

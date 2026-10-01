@@ -1,11 +1,22 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (Spine)
+
+Spine is a fork of [lexeko/tilelane](https://github.com/lexeko/tilelane) by
+Alexey Konoplev. Releases `0.1.0` and `0.1.1` below are upstream's.
+
+It installs as `io.github.thenobody0817.spine`, so it sits alongside upstream
+Tilelane instead of replacing it. Its settings keys, IPC target, and minimize
+journal keep their upstream `tilelane` spelling so existing pins and minimized
+windows carry over.
+
+### Added
 
 - A pinned app that is running now shows its state on the pin instead of a
   separate task button, so it appears once rather than twice.
 - Pinned taskbar apps match their windows ignoring case and an optional
   `.desktop` suffix, so a stored pin finds the windows it should collapse.
+  Stored pins keep whatever you wrote; Tilelane does not rewrite them.
 - A pin's underline marks a focused window, plain running, and minimized states,
   and urgent windows take priority over focus. A pin with several windows shows
   a count.
@@ -17,6 +28,14 @@
   each pin has collapsed.
 - Collapsing is always on for pins and adds no stored setting. Unpin an app to
   give it its own task buttons again.
+- The plugin id, install path, and product name changed to `Spine`, so this fork
+  can be installed alongside upstream Tilelane.
+
+### Known gaps
+
+- The second monitor, urgent-state rendering, and the picker's per-window
+  minimize, restore, and close buttons have not been checked live. See
+  [behavior and test coverage](docs/behavior-matrix.md#checks-that-remain-open).
 
 ## 0.1.1
 

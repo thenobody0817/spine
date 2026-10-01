@@ -1,4 +1,4 @@
-# Tilelane
+# Spine
 
 A familiar taskbar and Start menu for Omarchy. Open your apps with the mouse,
 then learn Omarchy's window shortcuts from the task context menus as you go.
@@ -14,15 +14,15 @@ its running state on the pin instead. Minimize and restore windows
 without changing their tiled or floating mode. Each monitor gets a bar with
 its own tasks and workspaces, plus tray icons and your configured Omarchy widgets.
 
-Tilelane follows your Omarchy theme and leaves Hyprland in charge of tiling.
+Spine follows your Omarchy theme and leaves Hyprland in charge of tiling.
 The standard shortcuts keep working. Pick a new theme, and the bar changes with it.
 
-![Tilelane on Omarchy with the Start menu open](preview.png)
+![Spine on Omarchy with the Start menu open](preview.png)
 
 ## Requirements
 
 Tested on Omarchy 4.0.4 with Hyprland 0.56.2 and Qt 6.11.2.
-Tilelane runs inside Omarchy's shell and uses its theme and fonts.
+Spine runs inside Omarchy's shell and uses its theme and fonts.
 
 Runtime commands include Bash, `hyprctl`, `uwsm-app`, `gtk-launch`, and common
 shell utilities. Floating-launch recovery also uses `jq` when available.
@@ -31,34 +31,39 @@ See the full [command inventory](docs/architecture.md#processes-and-commands).
 
 ## Install
 
-Install from GitHub and select Tilelane:
+Spine is a fork of [lexeko/tilelane](https://github.com/lexeko/tilelane), the
+original taskbar by Alexey Konoplev. It keeps upstream's taskbar, Start menu,
+window actions, and settings. The fork collapses a pinned app's tasks onto its
+pin, so a pinned app appears once instead of twice.
+
+Install from GitHub and select Spine:
 
 ```sh
-omarchy plugin add https://github.com/lexeko/tilelane.git
-omarchy bar use io.github.lexeko.tilelane
+omarchy plugin add https://github.com/thenobody0817/spine.git
+omarchy bar use io.github.thenobody0817.spine
 ```
 
 ### Manual installation
 
-Place a complete copy in `~/.config/omarchy/plugins/io.github.lexeko.tilelane`.
+Place a complete copy in `~/.config/omarchy/plugins/io.github.thenobody0817.spine`.
 Include `manifest.json`, `Bar.qml`, `qml/`, and `scripts/`.
 Keep the scripts' executable permissions. Do not use a symlink.
 Back up an existing installation before replacing it.
 
-Then discover and select Tilelane:
+Then discover and select Spine:
 
 ```sh
-omarchy plugin validate ~/.config/omarchy/plugins/io.github.lexeko.tilelane
+omarchy plugin validate ~/.config/omarchy/plugins/io.github.thenobody0817.spine
 omarchy-shell shell rescanPlugins
-omarchy bar use io.github.lexeko.tilelane
+omarchy bar use io.github.thenobody0817.spine
 ```
 
 ## Turn it on or off
 
-Select Tilelane:
+Select Spine:
 
 ```sh
-omarchy bar use io.github.lexeko.tilelane
+omarchy bar use io.github.thenobody0817.spine
 ```
 
 Return to Omarchy's built-in bar:
@@ -106,12 +111,12 @@ updates automatically. Places are separate from your pinned apps.
 ## Keyboard shortcuts
 
 Window context menus show Omarchy's shortcuts beside the actions they perform.
-Tilelane also keeps Omarchy's panel shortcuts working. It does not install or
+Spine also keeps Omarchy's panel shortcuts working. It does not install or
 rewrite Omarchy's bindings.
 
 ## Configure
 
-Tilelane follows a classic desktop taskbar layout. Start always sits at the
+Spine follows a classic desktop taskbar layout. Start always sits at the
 far left, with the workspace switcher beside it. Pinned apps and open windows
 come next. The clock stays at the far right. Tray icons and status widgets
 sit together to the left of the clock, with small gaps between groups.
@@ -119,15 +124,15 @@ sit together to the left of the clock, with small gaps between groups.
 You can rearrange those status widgets through Omarchy. Start, the workspace
 switcher, and the task area stay in place.
 
-Omarchy's section names describe its own bar. Tilelane fits those sections
+Omarchy's section names describe its own bar. Spine fits those sections
 into this taskbar layout:
 
 - The `right` section holds the tray and controls such as Bluetooth, Network,
-  and Volume. They stay together on the right side of Tilelane.
+  and Volume. They stay together on the right side of Spine.
 - The `center` section holds items such as Language, Weather, and Updates.
   They sit between those controls and the clock. The clock goes at the far
   right, even though Omarchy puts it in `center`.
-- The `left` section normally holds Omarchy's menu and workspaces. Tilelane
+- The `left` section normally holds Omarchy's menu and workspaces. Spine
   provides Start and its own workspace switcher instead. If you add other
   widgets to `left`, they join the status area, before the `right` widgets.
 
@@ -155,12 +160,12 @@ omarchy bar set omarchy.clock format 'h:mm AP'
 
 Changes apply without restarting the shell.
 
-Existing status controls share Tilelane's hover, keyboard-focus, and panel
+Existing status controls share Spine's hover, keyboard-focus, and panel
 underline styling. Other plugins keep their own visual content and mouse
 actions inside the shared host, so their internal styling may differ.
 The bar stays at the bottom of the screen.
 
-Tilelane saves taskbar pins, Start pins, identity overrides, and reduced motion
+Spine saves taskbar pins, Start pins, identity overrides, and reduced motion
 in Omarchy's `~/.config/omarchy/shell.json`. Changes apply without a restart.
 See [settings and recovery](docs/recovery.md#recover-pins-or-settings) for the fields.
 
@@ -180,7 +185,7 @@ Omarchy's settings.
 For a Git-managed installation with an upstream remote:
 
 ```sh
-omarchy plugin update io.github.lexeko.tilelane
+omarchy plugin update io.github.thenobody0817.spine
 omarchy restart shell
 ```
 
@@ -191,10 +196,10 @@ To remove the installed plugin:
 
 ```sh
 omarchy bar reset
-omarchy plugin remove io.github.lexeko.tilelane
+omarchy plugin remove io.github.thenobody0817.spine
 ```
 
-Tilelane's settings remain in `shell.json` after removal. See
+Spine's settings remain in `shell.json` after removal. See
 [recovery](docs/recovery.md) for cleanup and minimized-window recovery.
 
 ## Documentation

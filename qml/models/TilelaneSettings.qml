@@ -10,7 +10,7 @@ QtObject {
 
     property var shell: null
     property var barConfig: ({})
-    property string pluginId: "io.github.lexeko.tilelane"
+    property string pluginId: "io.github.thenobody0817.spine"
     readonly property var values: SettingsLogic.read(barConfig)
     readonly property bool active: barConfig && barConfig.id === pluginId
     readonly property bool loaded: active && barConfig.tilelaneSettingsVersion === 1

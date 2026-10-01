@@ -44,7 +44,7 @@ edit_config() {
   mv "$test_dir/replacement" "$test_dir/shell.json"
 }
 
-printf '%s\n' '{"version":1,"bar":{"id":"io.github.lexeko.tilelane","layout":{"right":[{"id":"omarchy.clock","format":"HH:mm"}]}},"idle":{"lock":600},"plugins":[{"id":"example.service","value":42}]}' >"$test_dir/shell.json"
+printf '%s\n' '{"version":1,"bar":{"id":"io.github.thenobody0817.spine","layout":{"right":[{"id":"omarchy.clock","format":"HH:mm"}]}},"idle":{"lock":600},"plugins":[{"id":"example.service","value":42}]}' >"$test_dir/shell.json"
 printf '%s\n' '{"version":1,"pins":["old-pin"],"overrides":{"terminal":"editor"},"reducedMotion":true}' >"$test_dir/legacy.json"
 cp "$test_dir/legacy.json" "$test_dir/legacy-original.json"
 start_shell
@@ -75,19 +75,19 @@ edit_config '.bar.id = "omarchy.bar"'
 await_state '(.loaded | not)' 'bar reset'
 printf '%s\n' '{"id":1,"kind":"pin","value":"blocked"}' >"$test_dir/action.json"
 await_state '.actionId == 1 and (.actionResult | not) and .writes == 0' 'inactive bar cannot write'
-edit_config '.bar.id = "io.github.lexeko.tilelane"'
+edit_config '.bar.id = "io.github.thenobody0817.spine"'
 await_state '.loaded and .pins == ["restored"] and .writes == 0' 're-enable retains settings'
 stop_shell
 
 # Fresh installation has no dependency on either old pin file.
 rm "$test_dir/legacy.json"
-printf '%s\n' '{"bar":{"id":"io.github.lexeko.tilelane"}}' >"$test_dir/shell.json"
+printf '%s\n' '{"bar":{"id":"io.github.thenobody0817.spine"}}' >"$test_dir/shell.json"
 start_shell
 await_state '.loaded and .error == "" and .pins == [] and .startPins == [] and (.values.reducedMotion | not) and .writes == 1' 'fresh installation'
 stop_shell
 
 # Do not silently drop preferences when legacy input is damaged.
-printf '%s\n' '{"bar":{"id":"io.github.lexeko.tilelane"}}' >"$test_dir/shell.json"
+printf '%s\n' '{"bar":{"id":"io.github.thenobody0817.spine"}}' >"$test_dir/shell.json"
 printf 'invalid legacy settings\n' >"$test_dir/legacy.json"
 start_shell
 await_state '(.loaded | not) and .writes == 0 and (.error | contains("Cannot import"))' 'invalid legacy settings are preserved'

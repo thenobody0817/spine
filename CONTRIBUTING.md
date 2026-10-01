@@ -1,4 +1,4 @@
-# Contributing to Tilelane
+# Contributing to Spine
 
 Read the [architecture](docs/architecture.md) before changing window actions,
 settings, or native widget integration. Keep documentation in simple language
@@ -26,7 +26,7 @@ omarchy plugin validate .
 The checks use Qt's QML tools and Python 3. Node and Lua run the pointer regression tests.
 Install ShellCheck for shell linting. The check script reports tools it skips.
 
-After installing and selecting Tilelane, run `./scripts/smoke`.
+After installing and selecting Spine, run `./scripts/smoke`.
 For input or window behavior, also test the affected action in the live bar.
 Tray rendering changes need the [shader rendering tests](qml/shaders/README.md).
 

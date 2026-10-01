@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "io.github.lexeko.tilelane",
-  "name": "Tilelane",
-  "version": "0.1.1",
-  "author": "Alexey Konoplev",
+  "id": "io.github.thenobody0817.spine",
+  "name": "Spine",
+  "version": "0.2.0",
+  "author": "thenobody0817, based on Tilelane by Alexey Konoplev",
   "license": "MIT",
-  "description": "A native task-oriented full bar for Omarchy Quattro.",
+  "description": "A native task-oriented full bar for Omarchy Quattro. A pinned app shows its running state on the pin instead of a duplicate task.",
   "kinds": [
     "bar"
   ],

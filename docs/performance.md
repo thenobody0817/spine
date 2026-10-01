@@ -1,7 +1,9 @@
 # Performance
 
-Measured on 2026-09-27 using runtime code from `f284b70`.
-The `0.1.0` release draft has the same runtime files.
+Measured on 2026-09-27 against upstream Tilelane runtime code from `f284b70`,
+before this fork existed. The `0.1.0` release draft has the same runtime files.
+Spine changed the task list and pin rendering since then, so these figures
+describe the base the fork started from, not current Spine.
 These figures describe one session, not a comparison with the stock bar.
 
 ## Environment
@@ -9,7 +11,7 @@ These figures describe one session, not a comparison with the stock bar.
 Omarchy 4.0.4-1, Hyprland 0.56.2, Quickshell 0.3.1, and Qt 6.11.2.
 Hyprland used its FALLBACK display at 1920 by 1080 and scale 1.
 This does not measure rendering on a physical display.
-Tilelane shared the normal Omarchy shell process and its configured widgets.
+Spine shared the normal Omarchy shell process and its configured widgets.
 
 No battery was present. The package energy counter required root access and
 was not read. These results establish no power or battery benefit.
@@ -31,18 +33,18 @@ CPU usage below measures the whole shell as a percentage of one CPU core.
 
 The snapshots did not show new child processes. Five-second sampling cannot
 rule out short-lived processes between samples. Source review found no
-recurring Tilelane-owned subprocess polling. Hosted widgets keep their own
+recurring Spine-owned subprocess polling. Hosted widgets keep their own
 refresh schedules.
 
 ## Window lifecycle and latency
 
-All 60 test windows opened, appeared in Tilelane's model, closed, and left the
+All 60 test windows opened, appeared in Spine's model, closed, and left the
 model. Each cycle returned to the original window count. Shared-shell memory
 changed from 455932 KiB to 454912 KiB.
 
 The latency figures exclude ten warmup cycles and use the remaining 50.
 The event measurements start when the test receives Hyprland's socket event.
-They include polling and an IPC round trip to observe Tilelane's model.
+They include polling and an IPC round trip to observe Spine's model.
 They do not measure when a frame reaches the display.
 
 | Measurement                   | 95th percentile |
@@ -88,7 +90,7 @@ ps -eo pid,ppid,etimes,%cpu,rss,comm,args
 
 Process output can contain private application arguments. Review it before sharing.
 
-For a stock-bar comparison, alternate stock and Tilelane runs under the same
+For a stock-bar comparison, alternate stock and Spine runs under the same
 conditions. Measure each for ten minutes and report the median across runs.
 Keep raw CPU ticks, memory samples, child processes, and compositor event counts.
 Separate process launch time from compositor-event latency.

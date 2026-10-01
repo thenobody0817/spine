@@ -1,11 +1,11 @@
 # Appearance and visual references
 
-The current source and accepted design changes define Tilelane's appearance.
+The current source and accepted design changes define Spine's appearance.
 Historical screenshots do not replace a current visual baseline.
 
 ## Current layout
 
-Dimensions below are base logical pixels unless noted. Tilelane applies
+Dimensions below are base logical pixels unless noted. Spine applies
 Omarchy's spacing and font scale. Output scale changes physical rendering.
 
 | Part             | Current design                                                                           |
@@ -44,7 +44,7 @@ the screen edge does not stretch the icon, text, or underline.
 
 ## Project preview
 
-[The project preview](../preview.png) shows the full desktop with Tilelane's
+[The project preview](../preview.png) shows the full desktop with Spine's
 taskbar and Start menu open.
 
 ## Earlier visual checks
